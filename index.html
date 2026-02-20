@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS Kedai - Staff Login</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 1200px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* LOGIN SCREEN */
+    .login-screen {
+      padding: 60px 40px;
+      text-align: center;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .login-screen h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    .login-screen p {
+      color: #666;
+      margin-bottom: 40px;
+    }
+
+    .pin-input {
+      width: 100%;
+      padding: 20px;
+      font-size: 24px;
+      text-align: center;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      letter-spacing: 8px;
+      transition: all 0.3s;
+    }
+
+    .pin-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+      margin-bottom: 10px;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .error-msg {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .error-msg.show {
+      display: block;
+      animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    /* MAIN POS SCREEN */
+    .pos-screen {
+      display: none;
+    }
+
+    .pos-screen.active {
+      display: block;
+    }
+
+    .pos-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pos-header h2 {
+      font-size: 24px;
+    }
+
+    .staff-info {
+      text-align: right;
+    }
+
+    .staff-info p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .staff-info small {
+      opacity: 0.7;
+    }
+
+    .logout-btn {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .pos-content {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 0;
+      min-height: calc(100vh - 80px);
+    }
+
+    /* MENU SECTION */
+    .menu-section {
+      padding: 30px;
+      background: #f9fafb;
+      overflow-y: auto;
+      max-height: calc(100vh - 80px);
+    }
+
+    .menu-header {
+      margin-bottom: 20px;
+    }
+
+    .menu-header h3 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .category-filter {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .category-btn {
+      padding: 8px 16px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+
+    .category-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    .menu-item {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .menu-item:hover {
+      border-color: #667eea;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .menu-item h4 {
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .menu-item .price {
+      color: #667eea;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    /* CART SECTION */
+    .cart-section {
+      background: white;
+      border-left: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-header {
+      padding: 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .cart-header h3 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      max-height: calc(100vh - 400px);
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .cart-item-info h4 {
+      color: #333;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .cart-item-info .item-price {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qty-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: #667eea;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .qty-btn:hover {
+      background: #5568d3;
+    }
+
+    .qty-display {
+      min-width: 30px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .remove-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .cart-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+
+    .cart-summary {
+      padding: 20px;
+      border-top: 1px solid #e0e0e0;
+      background: #f9fafb;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+
+    .summary-row.total {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+      padding-top: 12px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .discount-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* ORDER LIST */
+    .order-list {
+      padding: 20px;
+    }
+
+    .order-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .order-number {
+      font-weight: 700;
+      color: #667eea;
+      font-size: 18px;
+    }
+
+    .order-status {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .order-status.completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .order-status.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .order-items {
+      margin-bottom: 12px;
+    }
+
+    .order-item {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .order-total {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      text-align: right;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .pos-content {
+        grid-template-columns: 1fr;
+      }
+
+      .cart-section {
+        border-left: none;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .menu-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- ==================== LOGIN SCREEN ==================== -->
+    <div id="loginScreen" class="login-screen">
+      <h1>🍽️ POS Kedai</h1>
+      <p>Sila masukkan PIN untuk log masuk</p>
+      
+      <div id="errorMsg" class="error-msg"></div>
+      
+      <input 
+        type="password" 
+        id="pinInput" 
+        class="pin-input" 
+        placeholder="••••"
+        maxlength="4"
+        autofocus
+      >
+      
+      <button class="btn btn-primary" onclick="login()">Log Masuk</button>
+
+      <div id="loadingLogin" class="loading">
+        <div class="spinner"></div>
+        <p>Mengesahkan...</p>
+      </div>
+    </div>
+
+    <!-- ==================== POS SCREEN ==================== -->
+    <div id="posScreen" class="pos-screen">
+      <div class="pos-header">
+        <h2>🍽️ POS Kedai</h2>
+        <div class="staff-info">
+          <p>👤 <strong id="staffName">-</strong></p>
+          <small id="staffRole">-</small>
+          <br>
+          <button class="logout-btn" onclick="logout()">Log Keluar</button>
+        </div>
+      </div>
+
+      <div class="pos-content">
+        <!-- MENU SECTION -->
+        <div class="menu-section">
+          <div class="tabs">
+            <button class="tab active" onclick="switchTab('menuTab')">📋 Menu</button>
+            <button class="tab" onclick="switchTab('ordersTab')">📦 Pesanan Saya</button>
+          </div>
+
+          <!-- TAB 1: MENU -->
+          <div id="menuTab" class="tab-content active">
+            <div class="menu-header">
+              <h3>Pilih Menu</h3>
+              <div class="category-filter" id="categoryFilter">
+                <button class="category-btn active" onclick="filterCategory('all')">Semua</button>
+              </div>
+            </div>
+
+            <div id="loadingMenu" class="loading">
+              <div class="spinner"></div>
+              <p>Memuat menu...</p>
+            </div>
+
+            <div class="menu-grid" id="menuGrid"></div>
+          </div>
+
+          <!-- TAB 2: ORDERS -->
+          <div id="ordersTab" class="tab-content">
+            <div class="menu-header">
+              <h3>Pesanan Hari Ini (Saya)</h3>
+              <p style="color: #666; font-size: 14px;">Hanya paparan pesanan awak sahaja</p>
+            </div>
+
+            <div id="loadingOrders" class="loading">
+              <div class="spinner"></div>
+              <p>Memuat pesanan...</p>
+            </div>
+
+            <div class="order-list" id="orderList"></div>
+          </div>
+        </div>
+
+        <!-- CART SECTION -->
+        <div class="cart-section">
+          <div class="cart-header">
+            <h3>🛒 Keranjang</h3>
+            <p style="color: #666; font-size: 14px;"><span id="cartCount">0</span> item</p>
+          </div>
+
+          <div class="cart-items" id="cartItems">
+            <div class="cart-empty">
+              <p>Keranjang kosong</p>
+              <small>Klik menu untuk tambah</small>
+            </div>
+          </div>
+
+          <div class="cart-summary">
+            <input 
+              type="number" 
+              class="discount-input" 
+              id="discountInput" 
+              placeholder="Diskaun (RM)"
+              min="0"
+              step="0.01"
+              oninput="updateCartDisplay()"
+            >
+
+            <div class="summary-row">
+              <span>Subtotal:</span>
+              <span id="subtotal">RM 0.00</span>
+            </div>
+            <div class="summary-row">
+              <span>Diskaun:</span>
+              <span id="discount">RM 0.00</span>
+            </div>
+            <div class="summary-row total">
+              <span>JUMLAH:</span>
+              <span id="total">RM 0.00</span>
+            </div>
+
+            <button class="btn btn-success" onclick="checkout()">Bayar Sekarang</button>
+            <button class="btn btn-danger" onclick="clearCart()">Kosongkan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== CONFIG ====================
+    const API_URL = "https://script.google.com/macros/s/AKfycbwACvAQzeSWeV0dta-ttCXDHM0hNURiO1lsOtpnEbqSo9glcu2gC6N6SkW_9bVzBe1Z/exec";
+    const API_KEY = "your-api-key-here"; // ⬅️ TUKAR NI DENGAN API KEY AWAK!
+
+    // ==================== STATE ====================
+    let currentStaff = null;
+    let menuData = [];
+    let cart = [];
+    let allCategories = ['all'];
+
+    // ==================== API CALLS ====================
+    async function apiCall(action, data = {}) {
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey: API_KEY, action, data })
+        });
+        return await response.json();
+      } catch (error) {
+        console.error('API Error:', error);
+        return { success: false, error: 'Ralat sambungan. Cuba lagi.' };
+      }
+    }
+
+    // ==================== LOGIN ====================
+    async function login() {
+      const pin = document.getElementById('pinInput').value.trim();
+      if (!pin) {
+        showError('Sila masukkan PIN!');
+        return;
+      }
+
+      document.getElementById('loadingLogin').classList.add('show');
+      document.getElementById('errorMsg').classList.remove('show');
+
+      const result = await apiCall('login', { pin });
+
+      document.getElementById('loadingLogin').classList.remove('show');
+
+      if (result.success) {
+        currentStaff = result.staff;
+        localStorage.setItem('currentStaff', JSON.stringify(result.staff));
+        
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('posScreen').classList.add('active');
+        
+        document.getElementById('staffName').textContent = result.staff.name;
+        document.getElementById('staffRole').textContent = 
+          result.staff.role === 'admin' ? '👑 Admin' : '👤 Staff';
+
+        loadMenu();
+      } else {
+        showError(result.error || 'PIN tidak sah!');
+      }
+    }
+
+    function showError(msg) {
+      const errorEl = document.getElementById('errorMsg');
+      errorEl.textContent = msg;
+      errorEl.classList.add('show');
+      setTimeout(() => errorEl.classList.remove('show'), 3000);
+    }
+
+    function logout() {
+      if (confirm('Anda pasti mahu log keluar?')) {
+        currentStaff = null;
+        localStorage.removeItem('currentStaff');
+        cart = [];
+        document.getElementById('loginScreen').style.display = 'block';
+        document.getElementById('posScreen').classList.remove('active');
+        document.getElementById('pinInput').value = '';
+      }
+    }
+
+    // ==================== LOAD MENU ====================
+    async function loadMenu() {
+      document.getElementById('loadingMenu').classList.add('show');
+      
+      const result = await apiCall('getMenu');
+      
+      document.getElementById('loadingMenu').classList.remove('show');
+
+      if (result.success) {
+        menuData = result.menu;
+        
+        // Extract unique categories
+        const categories = [...new Set(menuData.map(item => item.category))];
+        allCategories = ['all', ...categories];
+        
+        // Render category filter
+        renderCategoryFilter();
+        
+        // Render menu
+        renderMenu();
+      } else {
+        alert('Gagal memuat menu: ' + result.error);
+      }
+    }
+
+    function renderCategoryFilter() {
+      const filterEl = document.getElementById('categoryFilter');
+      filterEl.innerHTML = allCategories.map(cat => `
+        <button class="category-btn ${cat === 'all' ? 'active' : ''}" 
+                onclick="filterCategory('${cat}')">
+          ${cat === 'all' ? 'Semua' : cat}
+        </button>
+      `).join('');
+    }
+
+    function filterCategory(category) {
+      // Update active button
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Filter and render
+      renderMenu(category);
+    }
+
+    function renderMenu(category = 'all') {
+      const filtered = category === 'all' 
+        ? menuData 
+        : menuData.filter(item => item.category === category);
+
+      const gridEl = document.getElementById('menuGrid');
+      gridEl.innerHTML = filtered.map(item => `
+        <div class="menu-item" onclick='addToCart(${JSON.stringify(item)})'>
+          <h4>${item.name}</h4>
+          <p class="price">RM ${item.price.toFixed(2)}</p>
+        </div>
+      `).join('');
+    }
+
+    // ==================== CART ====================
+    function addToCart(item) {
+      const existing = cart.find(i => i.id === item.id);
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({ ...item, qty: 1 });
+      }
+      updateCartDisplay();
+    }
+
+    function updateQty(itemId, delta) {
+      const item = cart.find(i => i.id === itemId);
+      if (item) {
+        item.qty += delta;
+        if (item.qty <= 0) {
+          removeFromCart(itemId);
+        } else {
+          updateCartDisplay();
+        }
+      }
+    }
+
+    function removeFromCart(itemId) {
+      cart = cart.filter(i => i.id !== itemId);
+      updateCartDisplay();
+    }
+
+    function clearCart() {
+      if (cart.length === 0) return;
+      if (confirm('Kosongkan keranjang?')) {
+        cart = [];
+        document.getElementById('discountInput').value = '';
+        updateCartDisplay();
+      }
+    }
+
+    function updateCartDisplay() {
+      const cartEl = document.getElementById('cartItems');
+      const countEl = document.getElementById('cartCount');
+
+      if (cart.length === 0) {
+        cartEl.innerHTML = `
+          <div class="cart-empty">
+            <p>Keranjang kosong</p>
+            <small>Klik menu untuk tambah</small>
+          </div>
+        `;
+        countEl.textContent = '0';
+        document.getElementById('subtotal').textContent = 'RM 0.00';
+        document.getElementById('discount').textContent = 'RM 0.00';
+        document.getElementById('total').textContent = 'RM 0.00';
+        return;
+      }
+
+      cartEl.innerHTML = cart.map(item => `
+        <div class="cart-item">
+          <div class="cart-item-info">
+            <h4>${item.name}</h4>
+            <p class="item-price">RM ${item.price.toFixed(2)} × ${item.qty}</p>
+          </div>
+          <div class="cart-item-controls">
+            <button class="qty-btn" onclick="updateQty('${item.id}', -1)">−</button>
+            <span class="qty-display">${item.qty}</span>
+            <button class="qty-btn" onclick="updateQty('${item.id}', 1)">+</button>
+            <button class="remove-btn" onclick="removeFromCart('${item.id}')">✕</button>
+          </div>
+        </div>
+      `).join('');
+
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+      const total = Math.max(0, subtotal - discount);
+
+      countEl.textContent = cart.length;
+      document.getElementById('subtotal').textContent = 'RM ' + subtotal.toFixed(2);
+      document.getElementById('discount').textContent = 'RM ' + discount.toFixed(2);
+      document.getElementById('total').textContent = 'RM ' + total.toFixed(2);
+    }
+
+    // ==================== CHECKOUT ====================
+    async function checkout() {
+      if (cart.length === 0) {
+        alert('Keranjang kosong!');
+        return;
+      }
+
+      const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+      const items = cart.map(item => ({
+        name: item.name,
+        price: item.price,
+        qty: item.qty
+      }));
+
+      const orderData = {
+        items,
+        discount,
+        tableNo: '-',
+        paymentMethod: 'cash',
+        staffName: currentStaff.name // ⬅️ PENTING: Hantar staff name!
+      };
+
+      const result = await apiCall('createOrder', orderData);
+
+      if (result.success) {
+        alert(`✅ Order #${result.orderNo} berjaya!\nJumlah: RM ${result.total}`);
+        cart = [];
+        document.getElementById('discountInput').value = '';
+        updateCartDisplay();
+        
+        // Reload orders kalau user tengah view orders tab
+        if (document.getElementById('ordersTab').classList.contains('active')) {
+          loadOrders();
+        }
+      } else {
+        alert('❌ Gagal: ' + result.error);
+      }
+    }
+
+    // ==================== ORDERS ====================
+    async function loadOrders() {
+      document.getElementById('loadingOrders').classList.add('show');
+
+      const result = await apiCall('getOrders', {
+        date: new Date().toISOString().split('T')[0],
+        staffName: currentStaff.name,      // ⬅️ Filter by staff name
+        staffRole: currentStaff.role       // ⬅️ Admin nampak semua
+      });
+
+      document.getElementById('loadingOrders').classList.remove('show');
+
+      if (result.success) {
+        renderOrders(result.orders);
+      } else {
+        alert('Gagal memuat pesanan: ' + result.error);
+      }
+    }
+
+    function renderOrders(orders) {
+      const listEl = document.getElementById('orderList');
+
+      if (orders.length === 0) {
+        listEl.innerHTML = `
+          <div class="cart-empty">
+            <p>Tiada pesanan hari ini</p>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = orders.map(order => `
+        <div class="order-card">
+          <div class="order-header">
+            <div>
+              <div class="order-number">Order #${order.orderNo}</div>
+              <small style="color: #666;">${order.time} • ${order.staffName}</small>
+            </div>
+            <span class="order-status ${order.status}">${
+              order.status === 'completed' ? 'Selesai' : 
+              order.status === 'pending' ? 'Pending' : 'Batal'
+            }</span>
+          </div>
+          <div class="order-items">
+            ${order.items.map(item => `
+              <div class="order-item">• ${item.name} × ${item.qty}</div>
+            `).join('')}
+          </div>
+          <div class="order-total">RM ${order.total.toFixed(2)}</div>
+        </div>
+      `).join('');
+    }
+
+    // ==================== TABS ====================
+    function switchTab(tabId) {
+      // Update tab buttons
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Update tab content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(tabId).classList.add('active');
+
+      // Load data if needed
+      if (tabId === 'ordersTab') {
+        loadOrders();
+      }
+    }
+
+    // ==================== ENTER KEY LOGIN ====================
+    document.getElementById('pinInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') login();
+    });
+
+    // ==================== AUTO LOGIN (if saved) ====================
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem('currentStaff');
+      if (saved) {
+        currentStaff = JSON.parse(saved);
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('posScreen').classList.add('active');
+        document.getElementById('staffName').textContent = currentStaff.name;
+        document.getElementById('staffRole').textContent = 
+          currentStaff.role === 'admin' ? '👑 Admin' : '👤 Staff';
+        loadMenu();
+      }
+    });
+  </script>
+
+</body>
+</html>
